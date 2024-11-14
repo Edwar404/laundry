@@ -1,5 +1,9 @@
 <?php
 session_start();
+if (!$_SESSION['id_level']) {
+  header('location: login.php');
+  exit;
+}
 ?>
 <!DOCTYPE html>
 

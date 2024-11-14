@@ -105,8 +105,8 @@ if (isset($_GET['delete'])) {
                                 <a href="tambah-user.php?edit=<?php echo $rowUser['id'] ?>">
                                   <span class="tf-icon btn btn-success bx bx-pencil"></span>
                                 </a> |
-                                <a onclick="return confirm('Apakah antum yakin akan menghapus data ini??')" href="user.php?delete=<?php echo $rowUser['id'] ?>"></a>
-                                <span class="tf-icon btn btn-danger bx bx-trash bx-12px"></span>
+                                <a onclick="return confirm('Apakah antum yakin akan menghapus data ini??')" href="tambah-user.php?delete=<?php echo $rowUser['id'] ?>">
+                                  <span class="tf-icon btn btn-danger bx bx-trash bx-12px"></span>
                                 </a>
                               </td>
                             </tr>
