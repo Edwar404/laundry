@@ -1,15 +1,37 @@
 <?php
 include 'koneksi.php';
 session_start();
-// Munculkan / Pilih sebuah kolom dari tabel users(database)
-$queryLevel = mysqli_query($koneksi, "SELECT * FROM level ORDER BY id DESC");
-//untuk menjadikan hasil query(data dari queryLevel) = menjadi sebuah data objek
-//Delete 
-if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-    $delete = mysqli_query($koneksi, "DELETE FROM level WHERE id = '$id'");
-    header("Location:level.php?hapus=berhasil");
+if (isset($_POST['simpan'])) {
+    $nama = $_POST['nama'];
+
+    $sql = "INSERT INTO level (nama_level) VALUES ('$nama')";
+    $result = mysqli_query($koneksi, $sql);
+    if ($result) {
+        header("Location: level.php");
+    } else {
+        echo "Error disimpan";
+        echo mysqli_error($koneksi);
+    }
 }
+// Parameter Edit
+$id = isset($_GET['edit']) ? $_GET['edit'] : '';
+$queryEdit = mysqli_query($koneksi, "SELECT * FROM level WHERE id = '$id'");
+$rowEdit = mysqli_fetch_assoc($queryEdit);
+
+if (isset($_POST['edit'])) {
+    $nama = $_POST['nama'];
+    //jika password di isi oleh user
+    $update = mysqli_query($koneksi, "UPDATE level SET nama_level='$nama' WHERE id='$id'");
+    header("location:level.php?ubah=berhasil");
+}
+
+// if (isset($_GET['delete'])) {
+//   $id = $_GET['id'];
+//   $delete = mysqli_query($koneksi, "DELETE FROM user WHERE id='$id'");
+//   header("location:user.php?delete=berhasil");
+// }
+
+$queryLevel = mysqli_query($koneksi, "SELECT * FROM level");
 ?>
 
 <!DOCTYPE html>
@@ -24,7 +46,7 @@ if (isset($_GET['delete'])) {
 * Copyright ThemeSelection (https://themeselection.com)
 
 =========================================================
- -->
+-->
 <!-- beautify ignore:start -->
 <html
     lang="en"
@@ -47,6 +69,11 @@ if (isset($_GET['delete'])) {
     <!-- Favicon -->
     <?php include 'inc/head.php' ?>
 </head>
+<style>
+    placeholder {
+        margin-top: 2rem;
+    }
+</style>
 
 <body>
     <!-- Layout wrapper -->
@@ -72,45 +99,25 @@ if (isset($_GET['delete'])) {
                         <div class="row">
                             <div class="col-sm-12">
                                 <div class="card mt-5">
-                                    <div class="card-header">Data User </div>
+                                    <div class="card-header"><?php echo isset($_GET['edit']) ? 'Edit' : 'Tambah' ?> Level</div>
                                     <div class="card-body">
                                         <?php if (isset($_GET['hapus'])) : ?>
                                             <div class="alert alert-success" role="alert">
                                                 Data berhasil Di hapus
                                             </div>
                                         <?php endif; ?>
-                                        <div align="right" class="mb-3">
-                                            <a href="tambah-level.php" class="btn btn-primary">Tambah</a>
-                                        </div>
-                                        <div class="table">
-                                            <table class="table table-responsive table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Nomor</th>
-                                                        <th>Level</th>
-                                                        <th>Aksi</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php $no = 1;
-                                                    while ($rowLevel = mysqli_fetch_assoc($queryLevel)) { ?>
-                                                        <tr>
-                                                            <td><?php echo $no++ ?></td>
-                                                            <td><?php echo $rowLevel['nama_level'] ?></td>
-                                                            <td>
-                                                                <a href="tambah-level.php?edit=<?php echo $rowLevel['id'] ?>">
-                                                                    <span class="tf-icon btn btn-success bx bx-pencil"></span>
-                                                                </a> |
-                                                                <a onclick="return confirm('Apakah antum yakin akan menghapus data ini??')" href="level.php?delete=<?php echo $rowLevel['id'] ?>">
-                                                                    <span class="tf-icon btn btn-danger bx bx-trash bx-12px"></span>
-                                                                </a>
-                                                            </td>
-                                                        </tr>
-                                                    <?php } ?>
-                                                </tbody>
-                                            </table>
+                                        <form action="" method="post" enctype="multipart/form-data">
+                                            <div class="mb-3 row">
+                                                <div class="col-sm-12 mb-4">
+                                                    <label for="">Nama Level</label>
+                                                    <input type="text" class="form-control" name="nama" id="" placeholder="Masukan Nama Level" value="<?php echo isset($_GET['edit']) ? $rowEdit['nama_level'] : '' ?>" required>
+                                                </div>
+                                                <div class="col-sm-12">
+                                                    <button type="submit" class=" btn btn-primary" name="<?php echo isset($_GET['edit']) ? 'edit' : 'simpan' ?>">Simpan</button>
+                                                </div>
+                                            </div>
+                                        </form>
 
-                                        </div>
                                     </div>
                                 </div>
                             </div>

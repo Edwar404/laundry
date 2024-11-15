@@ -39,11 +39,11 @@ if (isset($_POST['edit'])) {
   header("location:user.php?ubah=berhasil");
 }
 
-if (isset($_GET['delete'])) {
-  $id = $_GET['id'];
-  $delete = mysqli_query($koneksi, "DELETE FROM user WHERE id='$id'");
-  header("location:user.php?delete=berhasil");
-}
+// if (isset($_GET['delete'])) {
+//   $id = $_GET['id'];
+//   $delete = mysqli_query($koneksi, "DELETE FROM user WHERE id='$id'");
+//   header("location:user.php?delete=berhasil");
+// }
 
 $queryLevel = mysqli_query($koneksi, "SELECT * FROM level");
 ?>

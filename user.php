@@ -8,7 +8,7 @@ $queryUser = mysqli_query($koneksi, "SELECT user.*, level.nama_level FROM user L
 if (isset($_GET['delete'])) {
   $id = $_GET['delete'];
   $delete = mysqli_query($koneksi, "DELETE FROM user WHERE id = '$id'");
-  header("Location:user.php?login=berhasil");
+  header("Location:user.php?hapus=berhasil");
 }
 ?>
 
@@ -105,7 +105,7 @@ if (isset($_GET['delete'])) {
                                 <a href="tambah-user.php?edit=<?php echo $rowUser['id'] ?>">
                                   <span class="tf-icon btn btn-success bx bx-pencil"></span>
                                 </a> |
-                                <a onclick="return confirm('Apakah antum yakin akan menghapus data ini??')" href="tambah-user.php?delete=<?php echo $rowUser['id'] ?>">
+                                <a onclick="return confirm('Apakah antum yakin akan menghapus data ini??')" href="user.php?delete=<?php echo $rowUser['id'] ?>">
                                   <span class="tf-icon btn btn-danger bx bx-trash bx-12px"></span>
                                 </a>
                               </td>
