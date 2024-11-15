@@ -138,7 +138,13 @@ $queryLevel = mysqli_query($koneksi, "SELECT * FROM level");
                           <label for="">Pilih Level</label>
                           <select class="form-control" name="id_level" id="">
                             <option value="">--Pilih Level--</option>
-                            <?php while ($rowLevel = mysqli_fetch_assoc($queryLevel)) { ?>
+                            <?php while ($rowLevel = mysqli_fetch_assoc($queryLevel)) {
+                              // if (isset($_GET['edit']) && $row['id'] == $rowEdit['id_level']) {
+                              //   $selected = 'selected';
+                              // } else {
+                              //   $selected = '';
+                              // }
+                            ?>
                               <option <?php echo isset($_GET['edit']) ? ($rowLevel['id'] == $rowEdit['id_level'] ? 'selected' : '') : '' ?> value="<?php echo $rowLevel['id'] ?>"><?php echo $rowLevel['nama_level'] ?>
                               </option>
                             <?php } ?>

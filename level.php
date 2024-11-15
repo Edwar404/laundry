@@ -24,7 +24,7 @@ if (isset($_GET['delete'])) {
 * Copyright ThemeSelection (https://themeselection.com)
 
 =========================================================
- -->
+-->
 <!-- beautify ignore:start -->
 <html
     lang="en"
@@ -72,7 +72,7 @@ if (isset($_GET['delete'])) {
                         <div class="row">
                             <div class="col-sm-12">
                                 <div class="card mt-5">
-                                    <div class="card-header">Data User </div>
+                                    <div class="card-header">Data Level </div>
                                     <div class="card-body">
                                         <?php if (isset($_GET['hapus'])) : ?>
                                             <div class="alert alert-success" role="alert">
@@ -140,12 +140,12 @@ if (isset($_GET['delete'])) {
     <!-- / Layout wrapper -->
 
     <!-- <div class="buy-now">
-      <a
+    <a
         href="https://themeselection.com/products/sneat-bootstrap-html-admin-template/"
         target="_blank"
         class="btn btn-danger btn-buy-now"
         >Upgrade to Pro</a
-      >
+    >
     </div> -->
 
     <!-- Core JS -->
