@@ -24,7 +24,7 @@ if (isset($_GET['delete'])) {
 * Copyright ThemeSelection (https://themeselection.com)
 
 =========================================================
- -->
+-->
 <!-- beautify ignore:start -->
 <html
   lang="en"

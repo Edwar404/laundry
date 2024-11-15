@@ -127,12 +127,12 @@
             </a>
           </li>
           <li class="menu-item">
-            <a href="pages-account-settings-connections.html" class="menu-link">
+            <a href="customer.php" class="menu-link">
               <div data-i18n="Connections">Customer</div>
             </a>
           </li>
           <li class="menu-item">
-            <a href="pages-account-settings-connections.html" class="menu-link">
+            <a href="paket.php" class="menu-link">
               <div data-i18n="Connections">Paket</div>
             </a>
           </li>
@@ -148,17 +148,17 @@
         </a>
         <ul class="menu-sub">
           <li class="menu-item">
-            <a href="instruktur.php" class="menu-link" target="_blank">
+            <a href="trans_order.php" class="menu-link">
               <div data-i18n="Basic">Data Transaksi</div>
             </a>
           </li>
           <li class="menu-item">
-            <a href="auth-register-basic.html" class="menu-link" target="_blank">
+            <a href="auth-register-basic.html" class="menu-link">
               <div data-i18n="Basic">Transaksi Pengembalian</div>
             </a>
           </li>
           <li class="menu-item">
-            <a href="auth-forgot-password-basic.html" class="menu-link" target="_blank">
+            <a href="auth-forgot-password-basic.html" class="menu-link">
               <div data-i18n="Basic">Laporan Transaksi</div>
             </a>
           </li>
