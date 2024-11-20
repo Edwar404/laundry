@@ -102,10 +102,26 @@ if (isset($_GET['delete'])) {
                                                             <td><?php echo $row_trans['no_transaksi'] ?></td>
                                                             <td><?php echo $row_trans['nama_customer'] ?></td>
                                                             <td><?php echo $row_trans['tanggal_laundry'] ?></td>
-                                                            <td><?php echo $row_trans['status'] ?></td>
                                                             <td>
-                                                                <a href="tambah-trans.php?print=<?php echo $row_trans['id'] ?>">
-                                                                    <span class="tf-icon btn btn-success bx bx-print"></span>
+                                                                <?php
+                                                                switch ($row_trans['status']) {
+                                                                    case '1':
+                                                                        $badge = "<span class='badge bg-success'>Sudah Dikembalikan</span>";
+                                                                        break;
+                                                                    default:
+                                                                        $badge = "<span class='badge bg-warning'>Baru</span>";
+                                                                        break;
+                                                                }
+
+                                                                echo $badge;
+                                                                ?>
+                                                            </td>
+                                                            <td>
+                                                                <a href="tambah-trans.php?detail=<?php echo $row_trans['id'] ?>">
+                                                                    <span class="tf-icon btn btn-primary bx bx-show"></span>
+                                                                </a> |
+                                                                <a target="_blank" href="print.php?id=<?php echo $row_trans['id'] ?>">
+                                                                    <span class="tf-icon btn btn-success bx bx-printer"></span>
                                                                 </a> |
                                                                 <a onclick="return confirm('Apakah antum yakin akan menghapus data ini??')" href="trans_order.php?delete=<?php echo $row_trans['id'] ?>">
                                                                     <span class="tf-icon btn btn-danger bx bx-trash bx-12px"></span>

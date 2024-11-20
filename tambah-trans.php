@@ -2,26 +2,76 @@
 include 'koneksi.php';
 session_start();
 if (isset($_POST['simpan'])) {
+    // Mengambil nilai dari form input dengan attr name=""
+    $id_customer = $_POST['id_customer'];
     $no_transaksi = $_POST['no_transaksi'];
     $tanggal_laundry = $_POST['tanggal_laundry'];
 
+    $id_paket = $_POST['id_paket'];
+    // INSERT KE TABLE TRANS_ORDER
+    $insertTransOrder = mysqli_query($koneksi, "INSERT INTO trans_order(id_customer, no_transaksi, tanggal_laundry) VALUES ('$id_customer','$no_transaksi','$tanggal_laundry')");
 
-    $sql = "INSERT INTO trans_order (no_transaksi,tanggal_laundry) VALUES ('$no_transaksi','$tanggal_laundry')";
-    $result = mysqli_query($koneksi, $sql);
-    if ($result) {
-        header("Location: trans_order.php");
-    } else {
-        echo "Error disimpan";
-        echo mysqli_error($koneksi);
+    $last_id = mysqli_insert_id($koneksi);
+    // INSERT KE TABLE TRANS_DETAIL_ORDER
+    // MENGAMBIL NILAI LEBIH DARI SATU, LOOPING DENGAN FOREACH
+    foreach ($id_paket as $key => $value) {
+        $id_paket = array_filter($_POST['id_paket']);
+        $qty = array_filter($_POST['qty']);
+        $id_paket = $_POST['id_paket'][$key];
+        $qty = $_POST['qty'][$key];
+
+        // MENGAMBIL HARGA PAKET DARI DATABASE(table paket)
+        $queryPaket = mysqli_query($koneksi, "SELECT id, harga FROM paket WHERE id='$id_paket'");
+        $rowPaket = mysqli_fetch_assoc($queryPaket);
+        $harga = isset($rowPaket['harga']) ? $rowPaket['harga'] : '';
+        // SUBTOTAL
+        $subtotal = (int)$qty * (int)$harga;
+
+        if ($id_paket > 0) {
+            $insertTransDetail = mysqli_query($koneksi, "INSERT INTO trans_order_detail (id_order, id_paket, qty, subtotal) VALUES ('$last_id','$id_paket','$qty','$subtotal')");
+        }
     }
+
+
+    header("Location: trans_order.php?tambah=berhasil");
 }
 
 $queryCustomer = mysqli_query($koneksi, "SELECT * FROM customer");
-$queryPaket = mysqli_query($koneksi, "SELECT * FROM paket");
+$id = isset($_GET['detail']) ? $_GET['detail'] : '';
+$queryTransDetail = mysqli_query($koneksi, "SELECT customer.nama_customer,customer.phone, customer.addres, trans_order.no_transaksi, trans_order.tanggal_laundry, trans_order.status, paket.nama_paket, paket.harga, trans_order_detail.* FROM trans_order_detail LEFT JOIN paket ON paket.id = trans_order_detail.id_paket LEFT JOIN trans_order ON trans_order.id = trans_order_detail.id_order LEFT JOIN customer ON customer.id = trans_order.id_customer WHERE trans_order_detail.id_order = '$id'");
 $row = [];
-while ($data = mysqli_fetch_assoc($queryPaket)) {
-    $row[] = $data;
+while ($dataTrans = mysqli_fetch_assoc($queryTransDetail)) {
+    $row[] = $dataTrans;
 }
+
+// echo "<pre>";
+// print_r($row);
+// die;
+
+
+$queryPaket = mysqli_query($koneksi, "SELECT * FROM paket");
+$rowPaket = [];
+while ($data = mysqli_fetch_assoc($queryPaket)) {
+    $rowPaket[] = $data;
+}
+
+
+// NO INVOICE CODE
+// 001, jika ada autp increment id + 1 = 002, selain itu 001
+// MAX : terbesar, MIN : terkecil
+$queryInvoice = mysqli_query($koneksi, "SELECT MAX(id) AS no_invoice FROM trans_order");
+//JIKA DI DALAM TABLE TRANS ORDER ADA DATANYA
+$str_unique = "INV";
+$date_now = date("dmy");
+if (mysqli_num_rows($queryInvoice) > 0) {
+    $rowInvoice = mysqli_fetch_assoc($queryInvoice);
+    $incrementPlus = $rowInvoice['no_invoice'] + 1;
+    $code = $str_unique . "-" . $date_now . "-" . "000" . $incrementPlus;
+} else {
+    # JIKA DI DALAM TABLE TRANS ORDER TIDAK ADA DATANYA
+    $code = $str_unique . "-" . $date_now . "-" . "0001";
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -85,104 +135,189 @@ while ($data = mysqli_fetch_assoc($queryPaket)) {
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
                     <!-- Content -->
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="card mt-5">
-                                    <div class="card-header"><?php echo isset($_GET['edit']) ? 'Edit' : 'Tambah' ?> Transaksi</div>
-                                    <div class="card-body">
-                                        <?php if (isset($_GET['hapus'])) : ?>
-                                            <div class="alert alert-success" role="alert">
-                                                Data berhasil Di hapus
-                                            </div>
-                                        <?php endif; ?>
-                                        <form action="" method="post" enctype="multipart/form-data">
-                                            <div class="mb-3 row">
-                                                <div class="col-sm-12 mb-4">
-                                                    <label for="">Pelanggan</label>
-                                                    <select class="form-control" name="nama_customer" id="">
-                                                        <option value="">--Pilih Pelanggan--</option>
-                                                        <?php while ($rowCustomer = mysqli_fetch_assoc($queryCustomer)) { ?>
-                                                            <option value="<?php echo $rowCustomer['id'] ?>"><?php echo $rowCustomer['nama_customer'] ?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                                <div class="col-sm-6 mb-4">
-                                                    <label for="">No. Invoice</label>
-                                                    <input type="text" class="form-control" name="no_transaksi" id="" placeholder="Masukan Nama anda" value="<?php echo isset($_GET['edit']) ? $rowEdit['nama'] : '' ?>" readonly required>
-                                                </div>
-                                                <div class="col-sm-6 mb-4">
-                                                    <label for="">Tanggal Laundry</label>
-                                                    <input type="date" class="form-control" name="tanggal_laundry" id="" placeholder="Masukan tanggal_laundry anda" value="<?php echo isset($_GET['edit']) ? $rowEdit['username'] : '' ?>" required>
-                                                </div>
-                                                <div class="col-sm-6">
-                                                    <button type="submit" class=" btn btn-primary" name="<?php echo isset($_GET['edit']) ? 'edit' : 'simpan' ?>">Simpan</button>
-                                                </div>
-                                            </div>
-                                        </form>
+                    <?php if (isset($_GET['detail'])) : ?>
+                        <div class="container-xxl flex-grow-1 container-p-y">
+                            <div class="row">
+                                <div class="col-sm-12 mb-3"></div>
+                                <div class="col-sm-6">
+                                    <div class="card mt-5">
+                                        <div class="card-header">
+                                            <h5>Data Transaksi</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table table-bordered table-stripped">
+                                                <tr>
+                                                    <th>No. Invoice</th>
+                                                    <td><?php echo $row[0]['no_transaksi']
+                                                        ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Tanggal Laundry</th>
+                                                    <td><?php echo $row[0]['tanggal_laundry']
+                                                        ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <td><?php echo $row[0]['status']
+                                                        ?></td>
+                                                </tr>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="card mt-5">
-                                    <div class="card-header">Detail Transaksi</div>
+                                <div class="col-sm-6">
+                                    <div class="card mt-5">
+                                        <div class="card-header">
+                                            <h5>Data Pelanggan</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table table-bordered table-stripped">
+                                                <tr>
+                                                    <th>Nama</th>
+                                                    <td><?php echo $row[0]['nama_customer']
+                                                        ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Telepon</th>
+                                                    <td><?php echo $row[0]['phone']
+                                                        ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Alamat</th>
+                                                    <td><?php echo $row[0]['addres']
+                                                        ?></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 mt-2">
+                                    <div class="card-header">
+                                        <h5>Transaksi Detail</h5>
+                                    </div>
                                     <div class="card-body">
-                                        <?php if (isset($_GET['hapus'])) : ?>
-                                            <div class="alert alert-success" role="alert">
-                                                Data berhasil Di hapus
-                                            </div>
-                                        <?php endif; ?>
-                                        <form action="" method="post" enctype="multipart/form-data">
-                                            <div class="mb-3 row">
-                                                <div class="row mb-4">
-                                                    <div class="col-sm-3 mb-4">
-                                                        <label for="">Paket</label>
-                                                    </div>
-                                                    <div class="col-sm-9 mb-4">
-                                                        <select class="form-control" name="id_paket[]" id="">
-                                                            <option value="">--Pilih Paket--</option>
-                                                            <?php foreach ($row as $key => $value) { ?>
-                                                                <option value="<?php echo $value['id'] ?>"><?php echo $value['nama_paket'] ?></option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-sm-3 mb-4">
-                                                        <label for="">QTY</label>
-                                                    </div>
-                                                    <div class="col-sm-9">
-                                                        <input type="number" class="form-control" name="qty[]" id="" placeholder="Masukan Quantity" required>
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-4">
-                                                    <div class="col-sm-3 mb-4">
-                                                        <label for="">Paket</label>
-                                                    </div>
-                                                    <div class="col-sm-9 mb-4">
-                                                        <select class="form-control" name="id_paket[]" id="">
-                                                            <option value="">--Pilih Paket--</option>
-                                                            <?php foreach ($row as $key => $value) { ?>
-                                                                <option value="<?php echo $value['id'] ?>"><?php echo $value['nama_paket'] ?></option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-sm-3 mb-4">
-                                                        <label for="">QTY</label>
-                                                    </div>
-                                                    <div class="col-sm-9">
-                                                        <input type="number" class="form-control" name="qty[]" id="" placeholder="Masukan Quantity" required>
-                                                    </div>
-                                                </div>
-
-                                                <div class="col-sm-6">
-                                                    <button type="submit" class=" btn btn-primary" name="<?php echo isset($_GET['edit']) ? 'edit' : 'simpan' ?>">Simpan</button>
-                                                </div>
-                                            </div>
-                                        </form>
+                                        <table class="table table-bordered table-stripped">
+                                            <thead>
+                                                <tr>
+                                                    <th>NO</th>
+                                                    <th>Nama Paket</th>
+                                                    <th>Quantity</th>
+                                                    <th>Harga</th>
+                                                    <th>Subtotal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php $no = 1;
+                                                foreach ($row as $key => $value) : ?>
+                                                    <tr>
+                                                        <td><?php echo $no++ ?></td>
+                                                        <td><?php echo $value['nama_paket'] ?></td>
+                                                        <td><?php echo $value['qty'] ?></td>
+                                                        <td><?php echo "Rp . " . number_format($value['harga'])  ?></td>
+                                                        <td><?php echo "Rp . " . number_format($value['subtotal'])  ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    <?php else : ?>
+                        <div class="container">
+                            <form action="" method="post" enctype="multipart/form-data">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="card mt-5">
+                                            <div class="card-header"><?php echo isset($_GET['edit']) ? 'Edit' : 'Tambah' ?> Transaksi</div>
+                                            <div class="card-body">
+                                                <?php if (isset($_GET['hapus'])) : ?>
+                                                    <div class="alert alert-success" role="alert">
+                                                        Data berhasil Di hapus
+                                                    </div>
+                                                <?php endif; ?>
+                                                <div class="mb-3 row">
+                                                    <div class="col-sm-12 mb-4">
+                                                        <label for="">Pelanggan</label>
+                                                        <select class="form-control" name="id_customer" id="">
+                                                            <option value="">--Pilih Pelanggan--</option>
+                                                            <?php while ($rowCustomer = mysqli_fetch_assoc($queryCustomer)) { ?>
+                                                                <option value="<?php echo $rowCustomer['id'] ?>"><?php echo $rowCustomer['nama_customer'] ?></option>
+                                                            <?php } ?>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-sm-6 mb-4">
+                                                        <label for="">No. Invoice</label>
+                                                        <input type="text" class="form-control" name="no_transaksi" id="" placeholder="Masukan Nama anda" value="#<?php echo $code ?>" readonly required>
+                                                    </div>
+                                                    <div class="col-sm-6 mb-4">
+                                                        <label for="">Tanggal Laundry</label>
+                                                        <input type="date" class="form-control" name="tanggal_laundry" id="" placeholder="Masukan tanggal_laundry anda" value="<?php echo isset($_GET['edit']) ? $rowEdit['username'] : '' ?>" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="card mt-5">
+                                            <div class="card-header">Detail Transaksi</div>
+                                            <div class="card-body">
+                                                <?php if (isset($_GET['hapus'])) : ?>
+                                                    <div class="alert alert-success" role="alert">
+                                                        Data berhasil Di hapus
+                                                    </div>
+                                                <?php endif; ?>
+                                                <div class="mb-3 row">
+                                                    <div class="row mb-4">
+                                                        <div class="col-sm-3 mb-4">
+                                                            <label for="">Paket</label>
+                                                        </div>
+                                                        <div class="col-sm-9 mb-4">
+                                                            <select class="form-control" name="id_paket[]" id="">
+                                                                <option value="">--Pilih Paket--</option>
+                                                                <?php foreach ($rowPaket as $key => $value) { ?>
+                                                                    <option value="<?php echo $value['id'] ?>"><?php echo $value['nama_paket'] ?></option>
+                                                                <?php } ?>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-3 mb-4">
+                                                            <label for="">QTY</label>
+                                                        </div>
+                                                        <div class="col-sm-9">
+                                                            <input type="number" class="form-control" name="qty[]" id="" placeholder="Masukan Quantity">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row mb-4">
+                                                        <div class="col-sm-3 mb-4">
+                                                            <label for="">Paket</label>
+                                                        </div>
+                                                        <div class="col-sm-9 mb-4">
+                                                            <select class="form-control" name="id_paket[]" id="">
+                                                                <option value="">--Pilih Paket--</option>
+                                                                <?php foreach ($rowPaket as $key => $value) { ?>
+                                                                    <option value="<?php echo $value['id'] ?>"><?php echo $value['nama_paket'] ?></option>
+                                                                <?php } ?>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-sm-3 mb-4">
+                                                            <label for="">QTY</label>
+                                                        </div>
+                                                        <div class="col-sm-9">
+                                                            <input type="number" class="form-control" name="qty[]" id="" placeholder="Masukan Quantity">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <button type="submit" class=" btn btn-primary" name="<?php echo isset($_GET['edit']) ? 'edit' : 'simpan' ?>">Simpan</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                    <?php endif ?>
                     <!-- / Content -->
                     <!-- Footer -->
                     <div class="container">
