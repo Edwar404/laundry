@@ -2,14 +2,33 @@
 include 'koneksi.php';
 session_start();
 // Munculkan / Pilih sebuah kolom dari tabel users(database)
-$queryTransOrder = mysqli_query($koneksi, "SELECT customer.nama_customer, trans_order.* FROM trans_order LEFT JOIN customer ON customer.id = trans_order.id_customer ORDER BY id DESC");
-//untuk menjadikan hasil query(data dari queryTransOrder) = menjadi sebuah data objek
-//Delete 
-if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-    $delete = mysqli_query($koneksi, "DELETE FROM trans_order WHERE id = '$id'");
-    header("Location:trans_order.php?hapus=berhasil");
+$tanggal_dari = isset($_GET['tanggal_dari']) ? $_GET['tanggal_dari'] : '';
+$tanggal_sampai = isset($_GET['tanggal_sampai']) ? $_GET['tanggal_sampai'] : '';
+$status = isset($_GET['status']) ? $_GET['status'] : '';
+$query = "SELECT customer.nama_customer, trans_order.* FROM trans_order LEFT JOIN customer ON customer.id = trans_order.id_customer";
+
+// JIKA STATUS TIDAK KOSONG
+if ($tanggal_dari != "") {
+    $query .= " WHERE tanggal_laundry >= '$tanggal_dari'";
 }
+
+if ($tanggal_sampai != "") {
+    $query .= " OR tanggal_laundry = '$tanggal_sampai'";
+}
+
+if ($status != "") {
+    $query .= " AND status = $status";
+}
+$query .= " ORDER BY trans_order.id DESC";
+
+$queryTransOrder = mysqli_query($koneksi, $query);
+// //untuk menjadikan hasil query(data dari queryTransOrder) = menjadi sebuah data objek
+// //Delete 
+// if (isset($_GET['delete'])) {
+//     $id = $_GET['delete'];
+//     $delete = mysqli_query($koneksi, "DELETE FROM trans_order WHERE id = '$id'");
+//     header("Location:trans_order.php?hapus=berhasil");
+// }
 ?>
 
 <!DOCTYPE html>
@@ -79,9 +98,30 @@ if (isset($_GET['delete'])) {
                                                 Data berhasil Di hapus
                                             </div>
                                         <?php endif; ?>
-                                        <div align="right" class="mb-3">
-                                            <a href="tambah-trans.php" class="btn btn-primary">Tambah</a>
-                                        </div>
+                                        <!-- FILTER DATA TRANSAKSI -->
+                                        <form action="" method="get">
+                                            <div class="mb-3 row">
+                                                <div class="col-sm-3">
+                                                    <label for="">Tanggal dari</label>
+                                                    <input type="date" name="tanggal_dari" class="form-control">
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <label for="">Tanggal sampai</label>
+                                                    <input type="date" name="tanggal_sampai" class="form-control">
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <label for="">Status</label>
+                                                    <select name="status" class="form-control" id="">
+                                                        <option value="">--Pilih Status--</option>
+                                                        <option value="0">Baru</option>
+                                                        <option value="1">Sudah Dikembalikan</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-sm-3 d-flex align-items-end">
+                                                    <button name="filter" class="btn btn-primary">Tampilkan Laporan</button>
+                                                </div>
+                                            </div>
+                                        </form>
                                         <div class="table">
                                             <table class="table table-responsive table-bordered">
                                                 <thead>
@@ -114,9 +154,6 @@ if (isset($_GET['delete'])) {
                                                                 </a> |
                                                                 <a target="_blank" href="print.php?id=<?php echo $row_trans['id'] ?>">
                                                                     <span class="tf-icon btn btn-success bx bx-printer"></span>
-                                                                </a> |
-                                                                <a onclick="return confirm('Apakah antum yakin akan menghapus data ini??')" href="trans_order.php?delete=<?php echo $row_trans['id'] ?>">
-                                                                    <span class="tf-icon btn btn-danger bx bx-trash bx-12px"></span>
                                                                 </a>
                                                             </td>
                                                         </tr>
