@@ -37,7 +37,7 @@ if (isset($_POST['simpan'])) {
 }
 
 $queryCustomer = mysqli_query($koneksi, "SELECT * FROM customer");
-$id = isset($_GET['detail']) ? $_GET['detail'] : '';
+$id = isset($_GET['ambil']) ? $_GET['ambil'] : '';
 $queryTransDetail = mysqli_query($koneksi, "SELECT customer.nama_customer,customer.phone, customer.addres, trans_order.no_transaksi, trans_order.tanggal_laundry, trans_order.status, paket.nama_paket, paket.harga, trans_order_detail.* FROM trans_order_detail LEFT JOIN paket ON paket.id = trans_order_detail.id_paket LEFT JOIN trans_order ON trans_order.id = trans_order_detail.id_order LEFT JOIN customer ON customer.id = trans_order.id_customer WHERE trans_order_detail.id_order = '$id'");
 $row = [];
 while ($dataTrans = mysqli_fetch_assoc($queryTransDetail)) {
@@ -135,7 +135,7 @@ if (mysqli_num_rows($queryInvoice) > 0) {
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
                     <!-- Content -->
-                    <?php if (isset($_GET['detail'])) : ?>
+                    <?php if (isset($_GET['ambil'])) : ?>
                         <div class="container-xxl flex-grow-1 container-p-y">
                             <div class="row">
                                 <div class="col-sm-12 mb-3">
@@ -143,12 +143,12 @@ if (mysqli_num_rows($queryInvoice) > 0) {
                                         <div class="card-body">
                                             <div class="row">
                                                 <div class="col-sm-6">
-                                                    <h5>Transaksi Laundry <?php echo $row[0]['nama_customer'] ?></h5>
+                                                    <h5>Pengambilan Laundry <?php echo $row[0]['nama_customer'] ?></h5>
                                                 </div>
                                                 <div class="col-sm-6" align="right">
                                                     <a href="trans_order.php" class="btn btn-secondary">Kembali</a>
-                                                    <a href="print.php?id=<?php echo $row[0]['id_order'] ?>" class="btn btn-success">Print</a>
-                                                    <a href="tambah-trans-pickup.php?ambil=<?php echo $row[0]['id_order'] ?>" class="btn btn-warning">Ambil Cucian</a>
+                                                    <a href="print.php?id=<?php echo $id ?>" class="btn btn-success">Print</a>
+                                                    <a href="" class="btn btn-warning">Ambil Cucian</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -223,6 +223,7 @@ if (mysqli_num_rows($queryInvoice) > 0) {
                                             </thead>
                                             <tbody>
                                                 <?php $no = 1;
+                                                $total = 0;
                                                 foreach ($row as $key => $value) : ?>
                                                     <tr>
                                                         <td><?php echo $no++ ?></td>
@@ -231,7 +232,41 @@ if (mysqli_num_rows($queryInvoice) > 0) {
                                                         <td><?php echo "Rp . " . number_format($value['harga'])  ?></td>
                                                         <td><?php echo "Rp . " . number_format($value['subtotal'])  ?></td>
                                                     </tr>
+                                                    <?php
+                                                    $total += $value['subtotal'];
+                                                    ?>
                                                 <?php endforeach; ?>
+                                                <tr>
+                                                    <td class="" colspan="4" align="right"><strong>Total Keseluruhan</strong></td>
+                                                    <td class=""><strong>Rp <?php echo number_format($total) ?></strong></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="" colspan="4" align="right"><strong>Bayar</strong></td>
+                                                    <td class=""><strong><input class="form-control" placeholder="Masukkan Nominal Bayar" type="number" name="pickup_pay"></strong></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="" colspan="4" align="right"><strong>Kembalian</strong></td>
+                                                    <?php if (isset($_POST['proses_kembalian'])) {
+                                                        $total = $_POST['total'];
+                                                        $dibayar = $_POST['pickup_pay'];
+                                                        $subTotal = 0;
+                                                        $subTotal = $dibayar - $total;
+                                                    } ?>
+                                                    <td class="">
+                                                        <strong>
+                                                            <input class="form-control" placeholder="Nominal Kembalian" type="number" name="pickup_change" readonly>
+                                                            <input type="hidden" name="total" value="<?php echo $total ?>">
+                                                        </strong>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="5">
+                                                        <div class="d-flex justify-content-evenly">
+                                                            <button class="btn btn-primary" name="proses_kembalian">Proses Kembalian</button>
+                                                            <button class="btn btn-success" name="simpan_Transaksi">Simpan Transaksi</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </div>
