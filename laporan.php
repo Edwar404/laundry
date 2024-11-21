@@ -5,15 +5,15 @@ session_start();
 $tanggal_dari = isset($_GET['tanggal_dari']) ? $_GET['tanggal_dari'] : '';
 $tanggal_sampai = isset($_GET['tanggal_sampai']) ? $_GET['tanggal_sampai'] : '';
 $status = isset($_GET['status']) ? $_GET['status'] : '';
-$query = "SELECT customer.nama_customer, trans_order.* FROM trans_order LEFT JOIN customer ON customer.id = trans_order.id_customer";
+$query = "SELECT customer.nama_customer, trans_order.* FROM trans_order LEFT JOIN customer ON customer.id = trans_order.id_customer WHERE 1 ";
 
 // JIKA STATUS TIDAK KOSONG
 if ($tanggal_dari != "") {
-    $query .= " WHERE tanggal_laundry >= '$tanggal_dari'";
+    $query .= " AND tanggal_laundry >= '$tanggal_dari'";
 }
 
 if ($tanggal_sampai != "") {
-    $query .= " OR tanggal_laundry = '$tanggal_sampai'";
+    $query .= " AND tanggal_laundry <= '$tanggal_sampai'";
 }
 
 if ($status != "") {
