@@ -159,6 +159,7 @@ if (mysqli_num_rows($queryInvoice) > 0) {
                                         <div class="card-header">
                                             <h5>Data Transaksi</h5>
                                         </div>
+                                        <?php include 'helper.php' ?>
                                         <div class="card-body">
                                             <table class="table table-bordered table-stripped">
                                                 <tr>
@@ -173,8 +174,11 @@ if (mysqli_num_rows($queryInvoice) > 0) {
                                                 </tr>
                                                 <tr>
                                                     <th>Status</th>
-                                                    <td><?php echo $row[0]['status']
-                                                        ?></td>
+                                                    <td>
+                                                        <?php
+                                                        echo  changeStatus($row[0]['status'])
+                                                        ?>
+                                                    </td>
                                                 </tr>
                                             </table>
                                         </div>

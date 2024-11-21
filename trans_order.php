@@ -96,6 +96,7 @@ if (isset($_GET['delete'])) {
                                                 </thead>
                                                 <tbody>
                                                     <?php $no = 1;
+                                                    include 'helper.php';
                                                     while ($row_trans = mysqli_fetch_assoc($queryTransOrder)) { ?>
                                                         <tr>
                                                             <td><?php echo $no++ ?></td>
@@ -104,16 +105,7 @@ if (isset($_GET['delete'])) {
                                                             <td><?php echo $row_trans['tanggal_laundry'] ?></td>
                                                             <td>
                                                                 <?php
-                                                                switch ($row_trans['status']) {
-                                                                    case '1':
-                                                                        $badge = "<span class='badge bg-success'>Sudah Dikembalikan</span>";
-                                                                        break;
-                                                                    default:
-                                                                        $badge = "<span class='badge bg-warning'>Baru</span>";
-                                                                        break;
-                                                                }
-
-                                                                echo $badge;
+                                                                echo changeStatus($row_trans['status'])
                                                                 ?>
                                                             </td>
                                                             <td>
