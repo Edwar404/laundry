@@ -148,7 +148,9 @@ if (mysqli_num_rows($queryInvoice) > 0) {
                                                 <div class="col-sm-6" align="right">
                                                     <a href="trans_order.php" class="btn btn-secondary">Kembali</a>
                                                     <a href="print.php?id=<?php echo $row[0]['id_order'] ?>" class="btn btn-success">Print</a>
-                                                    <a href="tambah-trans-pickup.php?ambil=<?php echo $row[0]['id_order'] ?>" class="btn btn-warning">Ambil Cucian</a>
+                                                    <?php if ($row[0]['status'] == 0) { ?>
+                                                        <a href="tambah-trans-pickup.php?ambil=<?php echo $row[0]['id_order'] ?>" class="btn btn-warning">Ambil Cucian</a>
+                                                    <?php } ?>
                                                 </div>
                                             </div>
                                         </div>
@@ -164,20 +166,18 @@ if (mysqli_num_rows($queryInvoice) > 0) {
                                             <table class="table table-bordered table-stripped">
                                                 <tr>
                                                     <th>No. Invoice</th>
-                                                    <td><?php echo $row[0]['no_transaksi']
-                                                        ?></td>
+                                                    <td><?php echo $row[0]['no_transaksi'] ?>
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <th>Tanggal Laundry</th>
-                                                    <td><?php echo $row[0]['tanggal_laundry']
-                                                        ?></td>
+                                                    <td><?php echo $row[0]['tanggal_laundry'] ?>
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <th>Status</th>
                                                     <td>
-                                                        <?php
-                                                        echo  changeStatus($row[0]['status'])
-                                                        ?>
+                                                        <?php echo changeStatus($row[0]['status']) ?>
                                                     </td>
                                                 </tr>
                                             </table>
